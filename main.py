@@ -11,14 +11,23 @@ FPS = 60
 mixer.init()
 mixer.music.load("MUSIC.mp3")
 mixer.music.play()
+
+font.init()
+font = font.Font(None, 70)
+win = font.render('You Win!', True, (255,215,0))
+lose = font.render('You Lose!', True, (180,0,0))
+money = mixer.Sound('Money.ogg')
+kick = mixer.Sound('kick.ogg')
+finish = False
+
 class GameSprite(sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, player_speed):
         super().__init__()
         self.image = transform.scale(image.load(player_image),(65,65))
         self.rect = self.image.get_rect()
         self.speed = player_speed
-        self.rect_x = player_x
-        self.rect_y = player_y
+        self.rect.x = player_x
+        self.rect.y = player_y
     def reset(self):
         window.blit(self.image, (self.rect.x,self.rect.y))
 class Player(GameSprite):
@@ -66,17 +75,19 @@ w5 = Wall(90, 102, 62,100,20,450,10)
 w6 = Wall(90, 102, 62,100,20,450,10)
 w7 = Wall(90, 102, 62,100,20,450,10)
 
-player = Player("Knight-transformed.png",5, win_height - 80,4)
-enemy = Enemy("Sceleton-transformed.png",win_width - 80, 280, 3)
+player = Player("Knight-transformed.png",5, 200,4)
+enemy = Enemy("Sceleton-transformed.png",400, 280, 3)
 goal = GameSprite('treasure.png',400,420,0)
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
+    if finish != True:
         window.blit(background, (0,0))
         player.update()
-        player.reset()
         enemy.update()
+        player.reset()
+
         enemy.reset()
         goal.reset()
         w1.draw_wall()
@@ -86,6 +97,16 @@ while game:
         w5.draw_wall()
         w6.draw_wall()
         w7.draw_wall()
-        display.update()
-        clock.tick(FPS)
+        if sprite.collide_rect(player, enemy) or  sprite.collide_rect(player, w1) or sprite.collide_rect(player, w1) or sprite.collide_rect(player, w3) or sprite.collide_rect(player, w4) or sprite.collide_rect(player, w5) or sprite.collide_rect(player, w6) or sprite.collide_rect(player, w7) or sprite.collide_rect(player, w2):
+            kick.play()
+            window.blit(lose, (200,200))
+        if sprite.collide_rect(player, goal):
+            money.play()
+            window.blit(win, (200,200))
+    else:
+        time.delay(3000)
+        finish = False
+        player = Player("Knight-transformed.png",5, win_height - 80,4)
+    display.update()
+    clock.tick(FPS)
 
